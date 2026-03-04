@@ -1,3 +1,8 @@
+diff --git a/Homepage/index.html b/Homepage/index.html
+index b47601a0fa427914a454ae0299f5cd1d52ad2609..70cfcb3693451139ae75191239f7decd8a85c391 100644
+--- a/Homepage/index.html
++++ b/Homepage/index.html
+@@ -1,847 +1,35 @@
  <!DOCTYPE html>
 -<html lang="en">
 -
@@ -825,15 +830,14 @@
 +  <head>
 +    <meta charset="UTF-8" />
 +    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-+    <title>Wetter Lößnig für die Klasse</title>
++    <title>Thermometer Wetter Leipzig-Lößnig</title>
 +    <link rel="stylesheet" href="style.css" />
 +  </head>
 +  <body>
 +    <main class="weather-app">
 +      <header>
-+        <p class="badge">Wetter</p>
-+        <h1>Heute in Leipzig-Lößnig</h1>
-+        <p class="subtitle">So wissen wir jeden Morgen, was wir anziehen sollten.</p>
++        <h1>Thermometer: Leipzig-Lößnig</h1>
++        <p class="subtitle">Aktuelle Temperatur auf einen Blick</p>
 +      </header>
 +
 +      <section class="current-weather card" aria-live="polite">
@@ -865,19 +869,8 @@
 -
 -    
 -
- 
-+        <div class="clothing">
-+          <span class="clothing-icon" id="clothing-icon" aria-hidden="true">🧥</span>
-+          <div>
-+            <p class="label">Empfohlenes Oberteil</p>
-+            <p id="clothing-text">Einen Moment bitte …</p>
-+          </div>
-+        </div>
-+      </section>
- 
-+      <section class="forecast card">
-+        <h2>Vorhersage für die nächsten 3 Tage</h2>
-+        <div class="forecast-grid" id="forecast-grid"></div>
+-
+-
 +      </section>
  
 -</body>
