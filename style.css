@@ -1,325 +1,230 @@
-/* ================================================
-   Wetter + Präsentation Dashboard – Leipzig-Lößnig
-   ================================================ */
-
-/* === Reset & Basis === */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
 :root {
-  --bg-page:        #0d1117;
-  --bg-panel:       #161b22;
-  --bg-card:        #1c2330;
-  --bg-card-hover:  #21293a;
-  --border:         #30363d;
-  --accent:         #58a6ff;
-  --accent-warm:    #f78166;
-  --text-primary:   #e6edf3;
-  --text-secondary: #8b949e;
-  --text-dim:       #484f58;
-  --green:          #3fb950;
-  --yellow:         #d29922;
-  --red:            #f85149;
-  --radius:         10px;
-  --radius-sm:      6px;
-  --shadow:         0 4px 16px rgba(0,0,0,0.4);
-  --font:           'Segoe UI', system-ui, -apple-system, sans-serif;
+  --bg: linear-gradient(140deg, #d8ecff, #f5fbff 48%, #e9f7eb);
+  --card-bg: rgba(255, 255, 255, 0.92);
+  --text: #1f2d3d;
+  --muted: #5a6a7d;
+  --border: #dce8f7;
 }
 
-html, body {
-  height: 100%;
-  overflow: hidden;
+* {
+  box-sizing: border-box;
 }
 
 body {
-  font-family: var(--font);
-  background: var(--bg-page);
-  color: var(--text-primary);
-  font-size: 15px;
-  line-height: 1.5;
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
 }
 
-/* === Dashboard-Hauptlayout: Links 65% Video | Rechts 35% Wetter === */
-.dashboard {
+.page-layout {
+  width: min(1400px, 100% - 2rem);
+  margin: 1rem auto;
   display: grid;
-  grid-template-columns: 65fr 35fr;
-  gap: 12px;
-  height: 100vh;
-  padding: 12px;
-  background: var(--bg-page);
+  grid-template-columns: 1.7fr 1fr;
+  gap: 1rem;
+  align-items: start;
 }
 
-/* === Panel-Basis (gilt für beide Panels) === */
-.presentation-panel,
-.weather-panel {
-  display: flex;
-  flex-direction: column;
-  background: var(--bg-panel);
+.card {
+  background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 18px;
+  padding: 1rem;
+  box-shadow: 0 8px 20px rgba(31, 45, 61, 0.08);
+}
+
+.media-panel {
+  padding: 1.25rem;
+}
+
+.media-head h1 {
+  margin: 0.7rem 0 0.25rem;
+  font-size: clamp(1.35rem, 2vw, 2rem);
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--muted);
+}
+
+.badge {
+  display: inline-block;
+  background: #1d4ed8;
+  color: #fff;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.video-frame {
+  margin-top: 0.9rem;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 14px;
   overflow: hidden;
-  box-shadow: var(--shadow);
+  border: 1px solid #bfd6f5;
+  background: #0f172a;
 }
 
-/* === Panel-Header === */
-.panel-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  background: var(--bg-card);
-  border-bottom: 1px solid var(--border);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  flex-shrink: 0;
-}
-
-.panel-icon {
-  font-size: 16px;
-}
-
-/* === Panel-Footer === */
-.panel-footer {
-  padding: 8px 16px;
-  background: var(--bg-card);
-  border-top: 1px solid var(--border);
-  font-size: 11px;
-  color: var(--text-dim);
-  flex-shrink: 0;
-}
-
-/* ================================================
-   LINKE SEITE: Video / Präsentation
-   ================================================ */
-
-.video-wrapper {
-  position: relative;
-  flex: 1;
-  background: #000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-/* Video im 16:9-Verhältnis, füllt den verfügbaren Bereich */
-.video-wrapper video {
+.video-frame video {
   width: 100%;
   height: 100%;
   object-fit: contain;
   display: block;
 }
 
-/* Platzhalter wenn kein Video vorhanden */
-.video-placeholder {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
-  color: var(--text-secondary);
-  text-align: center;
-  padding: 24px;
+.media-note {
+  margin: 0.8rem 0 0;
+  color: var(--muted);
 }
-
-.placeholder-icon {
-  font-size: 64px;
-  opacity: 0.4;
-}
-
-.placeholder-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.placeholder-hint {
-  font-size: 13px;
-  color: var(--text-dim);
-  max-width: 320px;
-  line-height: 1.7;
-}
-
-.placeholder-hint code {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 1px 6px;
-  font-size: 12px;
-  color: var(--accent);
-}
-
-/* ================================================
-   RECHTE SEITE: Wetterdaten
-   ================================================ */
 
 .weather-panel {
-  overflow-y: auto;
+  display: grid;
+  gap: 1rem;
 }
 
-.weather-app {
-  flex: 1;
+.hero h2 {
+  margin: 0.7rem 0 0.25rem;
+  font-size: clamp(1.4rem, 1.8vw, 2rem);
+}
+
+.current-weather {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 12px;
-  overflow-y: auto;
+  justify-content: space-between;
+  gap: 0.8rem;
+  align-items: center;
 }
 
-/* === Cards === */
-.card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 14px;
-  transition: background 0.2s;
-}
-
-.card:hover {
-  background: var(--bg-card-hover);
-}
-
-.label {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-secondary);
-  margin-bottom: 8px;
-}
-
-/* === Aktuelle Temperatur === */
-.temperature-wrap {
+.weather-overview {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 0.75rem;
 }
 
-/* Thermometer */
-.thermometer {
-  position: relative;
-  width: 22px;
-  height: 90px;
-  background: var(--border);
-  border-radius: 11px;
-  overflow: hidden;
-  flex-shrink: 0;
+.weather-emoji {
+  font-size: 2.7rem;
 }
 
-.thermometer-bulb {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 22px;
-  height: 22px;
-  background: var(--accent-warm);
-  border-radius: 50%;
-  z-index: 2;
-}
-
-.thermometer-fill {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(to top, var(--accent-warm), var(--yellow));
-  height: 50%;
-  transition: height 0.8s ease;
-  border-radius: 0 0 11px 11px;
-}
-
-.temp-info {
-  flex: 1;
+.weather-summary {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
 }
 
 .temperature {
-  font-size: 42px;
+  margin: 0.1rem 0 0;
+  font-size: 1.9rem;
   font-weight: 800;
-  color: var(--text-primary);
-  line-height: 1;
-  margin: 4px 0;
 }
 
-.condition {
-  font-size: 13px;
-  color: var(--text-secondary);
+.muted {
+  margin: 0;
+  color: var(--muted);
 }
 
-/* === Kleidungsempfehlung === */
-.clothing-rec {
+.advice-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.thermometer {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 14px;
-  color: var(--text-primary);
+  gap: 0.9rem;
 }
 
-.clothing-rec span:first-child {
-  font-size: 26px;
+.therm-track {
+  width: 34px;
+  height: 145px;
+  border-radius: 999px;
+  background: #eef4ff;
+  border: 2px solid #bfd6f5;
+  display: flex;
+  align-items: flex-end;
+  padding: 4px;
 }
 
-/* === 3-Tage-Vorschau === */
+.therm-fill {
+  width: 100%;
+  height: 20%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, #f59e0b, #ef4444);
+  transition: height 0.5s ease;
+}
+
+.therm-label {
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.clothing-reco {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.clothing-icon {
+  font-size: 2.5rem;
+}
+
+.clothing-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
 .forecast-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-top: 4px;
+  grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.85rem;
 }
 
 .forecast-day {
-  background: var(--bg-page);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 10px 8px;
-  text-align: center;
-  font-size: 12px;
-  color: var(--text-secondary);
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  border-radius: 14px;
+  padding: 0.75rem;
+  background: #f7fbff;
 }
 
-.forecast-day strong {
-  font-size: 13px;
-  color: var(--text-primary);
+.forecast-day h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.temp-range {
+  margin: 0.35rem 0;
   font-weight: 700;
 }
 
-/* === Statuszeile === */
-.status {
-  font-size: 11px;
-  color: var(--text-dim);
-  text-align: center;
-  padding: 4px 0;
+@media (max-width: 1100px) {
+  .page-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .weather-panel {
+    grid-template-columns: repeat(2, minmax(240px, 1fr));
+    align-items: start;
+  }
+
+  .hero,
+  .forecast-section {
+    grid-column: 1 / -1;
+  }
 }
 
-/* ================================================
-   Responsive: Bei kleinem Bildschirm untereinander
-   ================================================ */
-@media (max-width: 900px) {
-  html, body {
-    overflow: auto;
-  }
-  .dashboard {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
-    height: auto;
-    min-height: 100vh;
-  }
-  .presentation-panel {
-    height: 56vw; /* 16:9 bei voller Breite */
-  }
+@media (max-width: 740px) {
   .weather-panel {
-    height: auto;
+    grid-template-columns: 1fr;
+  }
+
+  .current-weather {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
