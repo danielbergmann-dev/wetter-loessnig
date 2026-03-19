@@ -1,101 +1,163 @@
-const weatherCodeMap = {
-  0: "Sonnig",
-  1: "Überwiegend sonnig",
-  2: "Leicht bewölkt",
-  3: "Bewölkt",
-  45: "Neblig",
-  48: "Reifnebel",
-  51: "Leichter Nieselregen",
-  53: "Nieselregen",
-  55: "Starker Nieselregen",
-  61: "Leichter Regen",
-  63: "Regen",
-  65: "Starker Regen",
-  71: "Leichter Schnee",
-  73: "Schnee",
-  75: "Starker Schneefall",
-  80: "Regenschauer",
-  81: "Starke Regenschauer",
-  82: "Heftige Schauer",
-  95: "Gewitter"
+const LOESSNIG_COORDS = {
+  latitude: 51.3005,
+  longitude: 12.398,
 };
 
-function getClothingRecommendation(temp) {
-  if (temp <= 5) {
-    return { icon: "🧥", text: "Dicke Jacke + Pullover" };
+const elements = {
+  currentTime: document.getElementById('currentTime'),
+  weatherIcon: document.getElementById('weatherIcon'),
+  weatherSummary: document.getElementById('weatherSummary'),
+  temperature: document.getElementById('temperature'),
+  thermFill: document.getElementById('thermFill'),
+  thermLabel: document.getElementById('thermLabel'),
+  clothingIcon: document.getElementById('clothingIcon'),
+  clothingTitle: document.getElementById('clothingTitle'),
+  clothingHint: document.getElementById('clothingHint'),
+  forecast: document.getElementById('forecast'),
+};
+
+const weatherCodeMap = {
+  0: { label: 'Sonnig', icon: '☀️' },
+  1: { label: 'Meist sonnig', icon: '🌤️' },
+  2: { label: 'Teilweise bewölkt', icon: '⛅' },
+  3: { label: 'Bewölkt', icon: '☁️' },
+  45: { label: 'Nebel', icon: '🌫️' },
+  48: { label: 'Raureif-Nebel', icon: '🌫️' },
+  51: { label: 'Leichter Nieselregen', icon: '🌦️' },
+  53: { label: 'Nieselregen', icon: '🌦️' },
+  55: { label: 'Starker Nieselregen', icon: '🌧️' },
+  61: { label: 'Leichter Regen', icon: '🌦️' },
+  63: { label: 'Regen', icon: '🌧️' },
+  65: { label: 'Starker Regen', icon: '🌧️' },
+  71: { label: 'Leichter Schnee', icon: '🌨️' },
+  73: { label: 'Schnee', icon: '❄️' },
+  75: { label: 'Starker Schneefall', icon: '❄️' },
+  80: { label: 'Regenschauer', icon: '🌦️' },
+  81: { label: 'Kräftige Schauer', icon: '🌧️' },
+  82: { label: 'Starke Schauer', icon: '⛈️' },
+  95: { label: 'Gewitter', icon: '⛈️' },
+};
+
+function clothingRecommendation(temp, weatherCode, windspeed) {
+  const rainy = [51, 53, 55, 61, 63, 65, 80, 81, 82].includes(weatherCode);
+  const stormy = [95].includes(weatherCode) || windspeed >= 35;
+
+  if (temp <= 4) {
+    return {
+      icon: '🧥',
+      title: 'Winterjacke',
+      hint: 'Sehr kalt! Dicke Jacke und am besten Schal tragen.',
+    };
   }
-  if (temp <= 12) {
-    return { icon: "🧥", text: "Leichte Jacke oder Hoodie" };
+  if (temp <= 10) {
+    return {
+      icon: '🧥',
+      title: 'Warme Jacke',
+      hint: 'Es ist frisch. Eine warme Jacke ist heute gut.',
+    };
   }
-  if (temp <= 20) {
-    return { icon: "👕", text: "Langarmshirt oder T-Shirt" };
+  if (temp <= 16) {
+    return {
+      icon: rainy || stormy ? '🧥' : '👕',
+      title: rainy || stormy ? 'Übergangsjacke' : 'Langarmshirt / Hoodie',
+      hint: rainy || stormy
+        ? 'Nimm lieber eine leichte Jacke mit.'
+        : 'Ein Langarmshirt passt heute prima.',
+    };
+  }
+  if (temp <= 22) {
+    return {
+      icon: rainy ? '🧥' : '👕',
+      title: rainy ? 'Leichte Jacke' : 'T-Shirt',
+      hint: rainy
+        ? 'Mild, aber regnerisch – eine dünne Jacke ist sinnvoll.'
+        : 'Angenehm! Ein T-Shirt reicht meist aus.',
+    };
   }
 
-  return { icon: "🩳", text: "T-Shirt, heute ist es warm" };
+  return {
+    icon: '👕',
+    title: 'T-Shirt',
+    hint: 'Warmes Wetter! Denk an Sonnencreme und genug trinken.',
+  };
 }
 
-function getTempFillHeight(temp) {
-  const min = -10;
-  const max = 35;
-  const clamped = Math.max(min, Math.min(max, temp));
-  return ((clamped - min) / (max - min)) * 100;
+function setThermometer(temp) {
+  const clamped = Math.max(-10, Math.min(35, temp));
+  const percentage = ((clamped + 10) / 45) * 100;
+  elements.thermFill.style.height = `${percentage}%`;
+  elements.thermFill.style.background =
+    temp < 10
+      ? 'linear-gradient(180deg, #60a5fa, #0ea5e9)'
+      : 'linear-gradient(180deg, #f59e0b, #ef4444)';
+  elements.thermLabel.textContent = `${Math.round(temp)} °C`;
 }
 
-function weekday(dateString) {
-  return new Date(dateString).toLocaleDateString("de-DE", { weekday: "short" });
+function getWeatherInfo(code) {
+  return weatherCodeMap[code] || { label: 'Unbekannt', icon: '🌈' };
+}
+
+function formatDay(dateString) {
+  return new Date(dateString).toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' });
 }
 
 async function loadWeather() {
-  const statusEl = document.getElementById("status");
+  const url =
+    `https://api.open-meteo.com/v1/forecast?latitude=${LOESSNIG_COORDS.latitude}` +
+    `&longitude=${LOESSNIG_COORDS.longitude}` +
+    '&current=temperature_2m,weather_code,wind_speed_10m' +
+    '&daily=weather_code,temperature_2m_max,temperature_2m_min' +
+    '&timezone=Europe%2FBerlin&forecast_days=4';
 
-  try {
-    statusEl.textContent = "Wetterdaten werden geladen …";
-
-    const response = await fetch(
-      "https://api.open-meteo.com/v1/forecast?latitude=51.3059&longitude=12.3713&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Europe%2FBerlin&forecast_days=4"
-    );
-
-    if (!response.ok) {
-      throw new Error("Die Wetterdaten konnten nicht geladen werden.");
-    }
-
-    const data = await response.json();
-    const currentTemp = Math.round(data.current.temperature_2m);
-    const currentCode = data.current.weather_code;
-    const condition = weatherCodeMap[currentCode] || "Unbekannt";
-
-    document.getElementById("current-temp").textContent = `${currentTemp}°C`;
-    document.getElementById("current-condition").textContent = condition;
-
-    const clothing = getClothingRecommendation(currentTemp);
-    document.getElementById("clothing-icon").textContent = clothing.icon;
-    document.getElementById("clothing-text").textContent = clothing.text;
-
-    document.getElementById("thermometer-fill").style.height = `${getTempFillHeight(currentTemp)}%`;
-
-    const forecastGrid = document.getElementById("forecast-grid");
-    forecastGrid.innerHTML = "";
-
-    for (let i = 1; i <= 3; i += 1) {
-      const dayCode = data.daily.weather_code[i];
-      const day = document.createElement("article");
-      day.className = "forecast-day";
-      day.innerHTML = `
-        <p><strong>${weekday(data.daily.time[i])}</strong></p>
-        <p>${weatherCodeMap[dayCode] || "Wetter"}</p>
-        <p>🌡️ ${Math.round(data.daily.temperature_2m_max[i])}° / ${Math.round(
-        data.daily.temperature_2m_min[i]
-      )}°</p>
-      `;
-      forecastGrid.appendChild(day);
-    }
-
-    statusEl.textContent = "Aktualisiert: " + new Date().toLocaleTimeString("de-DE");
-  } catch (error) {
-    statusEl.textContent =
-      "Ups! Wetterdaten konnten gerade nicht geladen werden. Bitte später neu versuchen.";
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error('Wetterdaten konnten nicht geladen werden.');
   }
+
+  const data = await response.json();
+  const current = data.current;
+  const today = getWeatherInfo(current.weather_code);
+
+  elements.currentTime.textContent = `Stand: ${new Date().toLocaleTimeString('de-DE', {
+    hour: '2-digit',
+    minute: '2-digit',
+  })} Uhr`;
+  elements.weatherIcon.textContent = today.icon;
+  elements.weatherSummary.textContent = today.label;
+  elements.temperature.textContent = `${Math.round(current.temperature_2m)} °C`;
+
+  setThermometer(current.temperature_2m);
+
+  const recommendation = clothingRecommendation(
+    current.temperature_2m,
+    current.weather_code,
+    current.wind_speed_10m,
+  );
+
+  elements.clothingIcon.textContent = recommendation.icon;
+  elements.clothingTitle.textContent = recommendation.title;
+  elements.clothingHint.textContent = recommendation.hint;
+
+  const forecastItems = data.daily.time.slice(1, 4).map((date, index) => {
+    const code = data.daily.weather_code[index + 1];
+    const info = getWeatherInfo(code);
+    const max = Math.round(data.daily.temperature_2m_max[index + 1]);
+    const min = Math.round(data.daily.temperature_2m_min[index + 1]);
+    return `
+      <article class="forecast-day">
+        <h3>${formatDay(date)}</h3>
+        <p class="weather-summary">${info.icon} ${info.label}</p>
+        <p class="temp-range">${max} °C / ${min} °C</p>
+      </article>
+    `;
+  });
+
+  elements.forecast.innerHTML = forecastItems.join('');
 }
 
-loadWeather();
-setInterval(loadWeather, 1000 * 60 * 10);
+loadWeather().catch((error) => {
+  elements.weatherSummary.textContent = 'Ups, die Wetterdaten sind gerade nicht erreichbar.';
+  elements.clothingTitle.textContent = 'Heute auf Nummer sicher gehen';
+  elements.clothingHint.textContent = 'Bitte schaut kurz aus dem Fenster und entscheidet gemeinsam.';
+  elements.forecast.innerHTML = `<p class="muted">${error.message}</p>`;
+});
